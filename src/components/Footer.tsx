@@ -58,7 +58,7 @@ export default function Footer() {
             <div className="text-center md:text-left mb-4 space-y-2">
               <div className="relative w-24 h-24 mx-auto md:mx-0 mb-3">
                 <Image
-                  src="/comnyLogo.png"
+                  src="/comnyLogo.svg"
                   alt="Abbah Logo"
                   fill
                   className="object-contain opacity-90"

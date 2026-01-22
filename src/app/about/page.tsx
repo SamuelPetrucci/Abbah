@@ -39,8 +39,8 @@ export default function AboutPage() {
             <ScrollAnimation>
               <div className="relative h-96 rounded-lg overflow-hidden shadow-lg">
                 <Image
-                  src="https://images.unsplash.com/photo-1609220136736-443140cffec6?w=800&h=600&fit=crop&q=80"
-                  alt="Community support"
+                  src="/family-empowerment.png"
+                  alt="Empowered Black family standing together in solidarity"
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 50vw"

@@ -10,8 +10,8 @@ export default function Volunteer() {
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="https://images.unsplash.com/photo-1609220136736-443140cffec6?w=1600&h=900&fit=crop&q=80"
-          alt="Volunteer background"
+          src="/family-empowerment.png"
+          alt="Black families and fathers volunteering and supporting community"
           fill
           className="object-cover opacity-30"
           sizes="100vw"

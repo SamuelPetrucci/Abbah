@@ -17,19 +17,19 @@ interface Slide {
 const slides: Slide[] = [
   {
     id: 1,
-    type: 'mission',
-    title: 'A non-profit working towards change in communities with gaps in generational fathering',
-    description: 'Join us in building stronger families and communities through support, guidance, and connection',
-    image: 'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=1200&h=800&fit=crop&q=80',
-    link: '/about',
-    cta: 'Learn More',
+    type: 'event',
+    title: 'Family Finger Painting Party (Ages 2-5)',
+    description: 'A creative, messy, joy-filled experience for little hands & big hearts. Join us for a relaxed, playful art experience where children explore colors, textures, and creativity while parents enjoy meaningful connection time.',
+    image: '/hero-painting.png',
+    link: 'https://www.eventbrite.com/e/family-finger-painting-party-ages-2-5-tickets-1980139110383',
+    cta: 'Get Tickets',
   },
   {
     id: 2,
     type: 'photo',
     title: 'Building Stronger Families Together',
     description: 'Supporting fathers and families in our community with resources, programs, and guidance',
-    image: 'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=1200&h=800&fit=crop&q=80',
+    image: '/family-empowerment.png',
     link: '/resources',
     cta: 'Get Resources',
   },
@@ -38,7 +38,7 @@ const slides: Slide[] = [
     type: 'event',
     title: 'Upcoming Event: Homemade Pasta Class',
     description: 'Join us for an interactive cooking class where families can learn together and create lasting memories',
-    image: 'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=1200&h=800&fit=crop&q=80',
+    image: '/hero-painting.png',
     link: '/events',
     cta: 'Sign Up',
   },
@@ -47,7 +47,7 @@ const slides: Slide[] = [
     type: 'photo',
     title: 'Creating Lasting Connections',
     description: 'Our programs bring families together through shared experiences and meaningful activities',
-    image: 'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=1200&h=800&fit=crop&q=80',
+    image: '/abbah-tribe-family.png',
     link: '/about',
     cta: 'Our Mission',
   },
@@ -56,7 +56,7 @@ const slides: Slide[] = [
     type: 'event',
     title: 'Volunteer Opportunities Available',
     description: 'Become an active member of the Abbah Family and make a meaningful difference in your community',
-    image: 'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=1200&h=800&fit=crop&q=80',
+    image: '/hero-painting.png',
     link: '/contact?type=volunteer',
     cta: 'Volunteer',
   },
@@ -65,7 +65,7 @@ const slides: Slide[] = [
     type: 'photo',
     title: 'Supporting the LGBTQ+ Community',
     description: 'Building up the LGBTQ+ community with unique needs and references to lack of fathering',
-    image: 'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=1200&h=800&fit=crop&q=80',
+    image: '/hero-painting.png',
     link: '/about',
     cta: 'Learn More',
   },
@@ -74,7 +74,7 @@ const slides: Slide[] = [
     type: 'event',
     title: 'Cooking for Little Ones',
     description: 'A family-friendly event focused on preparing healthy meals with and for children',
-    image: 'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=1200&h=800&fit=crop&q=80',
+    image: '/hero-painting.png',
     link: '/events',
     cta: 'Join Us',
   },
@@ -83,6 +83,8 @@ const slides: Slide[] = [
 export default function HeroCarousel() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  const [touchStart, setTouchStart] = useState(0)
+  const [touchEnd, setTouchEnd] = useState(0)
 
   useEffect(() => {
     if (!isAutoPlaying) return
@@ -93,6 +95,30 @@ export default function HeroCarousel() {
 
     return () => clearInterval(interval)
   }, [isAutoPlaying])
+
+  // Touch handlers for swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+
+    if (isLeftSwipe) {
+      goToNext()
+    }
+    if (isRightSwipe) {
+      goToPrevious()
+    }
+  }
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index)
@@ -113,7 +139,12 @@ export default function HeroCarousel() {
   }
 
   return (
-    <div className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] overflow-hidden rounded-lg shadow-xl">
+    <div 
+      className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] overflow-hidden rounded-lg shadow-xl"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Slides */}
       <div className="relative w-full h-full">
         {slides.map((slide, index) => (
@@ -155,12 +186,23 @@ export default function HeroCarousel() {
                     </p>
                   )}
                   {slide.link && slide.cta && (
-                    <Link
-                      href={slide.link}
-                      className="inline-block bg-abbah-gold hover:bg-abbah-gold-alt text-abbah-charcoal px-8 py-3 rounded-md font-semibold uppercase text-sm transition-all shadow-lg hover:shadow-xl hover:scale-105"
-                    >
-                      {slide.cta}
-                    </Link>
+                    slide.link.startsWith('http') ? (
+                      <a
+                        href={slide.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block bg-abbah-gold hover:bg-abbah-gold-alt text-abbah-charcoal px-8 py-3 rounded-md font-semibold uppercase text-sm transition-all shadow-lg hover:shadow-xl hover:scale-105"
+                      >
+                        {slide.cta}
+                      </a>
+                    ) : (
+                      <Link
+                        href={slide.link}
+                        className="inline-block bg-abbah-gold hover:bg-abbah-gold-alt text-abbah-charcoal px-8 py-3 rounded-md font-semibold uppercase text-sm transition-all shadow-lg hover:shadow-xl hover:scale-105"
+                      >
+                        {slide.cta}
+                      </Link>
+                    )
                   )}
                 </div>
               </div>

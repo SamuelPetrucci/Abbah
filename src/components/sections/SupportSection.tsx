@@ -40,8 +40,8 @@ export default function SupportSection() {
           <ScrollAnimation>
             <div className="relative h-96 md:h-[500px] rounded-lg overflow-hidden shadow-lg">
               <Image
-                src="https://images.unsplash.com/photo-1609220136736-443140cffec6?w=1200&h=800&fit=crop&q=80"
-                alt="Community support"
+                src="/father-daughter-teeth.png"
+                alt="Black father providing support and guidance to child through everyday bonding moments"
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"

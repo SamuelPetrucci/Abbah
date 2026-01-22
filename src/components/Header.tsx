@@ -18,23 +18,27 @@ export default function Header() {
 
   return (
     <header className="bg-abbah-light sticky top-0 z-50 shadow-sm">
-      <nav className="container mx-auto px-4 py-3 flex items-center justify-between">
+      <nav className="container mx-auto px-4 py-2 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
           <div className="relative h-16 md:h-20 lg:h-24 w-auto flex-shrink-0">
             <Image
-              src="/comnyLogo.svg"
+              src="/image.png"
               alt="Abbah - Fathering for Good"
               width={200}
               height={96}
               className="h-full w-auto object-contain"
+              style={{
+                mixBlendMode: 'multiply',
+                filter: 'contrast(1.1)',
+              }}
               priority
             />
           </div>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-8">
+        <div className="hidden md:flex items-center space-x-6">
           {navItems.map((item) => (
             <Link
               key={item.name}

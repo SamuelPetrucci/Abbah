@@ -15,20 +15,20 @@ export default function SocialFeed() {
     {
       id: 2,
       type: 'image',
-      image: 'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=600&h=600&fit=crop&q=80',
-      alt: 'Father reading with child',
+      image: '/abbah-tribe-family.png',
+      alt: 'Abbah Tribe family wearing branded hoodies',
     },
     {
       id: 3,
       type: 'image',
-      image: 'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=600&h=600&fit=crop&q=80',
-      alt: 'Community gathering',
+      image: '/father-daughter-teeth.png',
+      alt: 'Black father and daughter bonding while brushing teeth',
     },
     {
       id: 4,
       type: 'image',
-      image: 'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=600&h=600&fit=crop&q=80',
-      alt: 'Family playing together',
+      image: '/family-empowerment.png',
+      alt: 'Empowered Black family standing together',
     },
     {
       id: 5,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import ScrollAnimation from '@/components/ScrollAnimation'
 
@@ -13,6 +13,7 @@ interface Event {
   location: string
   image: string
   category: string
+  externalLink?: string // Optional link to external registration (e.g., Eventbrite)
 }
 
 // Generate events for the next couple of weeks
@@ -24,6 +25,15 @@ const getUpcomingEvents = (): Event[] => {
   twoWeeksFromNow.setDate(today.getDate() + 14) // 2 weeks from today
 
   const eventTemplates: Omit<Event, 'id' | 'date'>[] = [
+    {
+      title: 'Family Finger Painting Party (Ages 2-5)',
+      description: 'A creative, messy, joy-filled experience for little hands & big hearts. Join us for a relaxed, playful art experience where children explore colors, textures, and creativity while parents enjoy meaningful connection time.',
+      time: '2:00 PM - 3:30 PM',
+      location: '75 Brace Rd, West Hartford, CT',
+      image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800&h=600&fit=crop&q=80',
+      category: 'Family',
+      externalLink: 'https://www.eventbrite.com/e/family-finger-painting-party-ages-2-5-tickets-1980139110383',
+    },
     {
       title: 'Homemade Pasta Class',
       description: 'Join us for an interactive cooking class where families can learn to make pasta together. This hands-on workshop is perfect for parents and children to bond while learning new culinary skills.',
@@ -61,21 +71,20 @@ const getUpcomingEvents = (): Event[] => {
   // Generate events spread over the next 2 weeks
   const events: Event[] = []
   let id = 1
-  const daysToAdd = [3, 7] // Events on days 3 and 7 from today (only 2 events)
-
-  daysToAdd.forEach((days, index) => {
-    const eventDate = new Date(today)
-    eventDate.setDate(today.getDate() + days)
-    
-    // Only add events that are within the 2-week window
-    if (eventDate <= twoWeeksFromNow && index < eventTemplates.length) {
-      events.push({
-        id: id++,
-        ...eventTemplates[index],
-        date: eventDate,
-      })
-    }
+  
+  // Add the Family Finger Painting Party event on February 8, 2026
+  // Create date in local timezone to avoid UTC issues (month is 0-indexed, so 1 = February)
+  const paintingEventDate = new Date(2026, 1, 8, 14, 0, 0) // Feb 8, 2026 at 2:00 PM
+  
+  // Always add the painting event - it's a scheduled event on Feb 8, 2026
+  events.push({
+    id: id++,
+    ...eventTemplates[0], // Family Finger Painting Party
+    date: paintingEventDate,
   })
+  
+  // Note: Removed fake events (Homemade Pasta, Cooking for Little Ones) 
+  // Only real scheduled events should be added here
 
   // Sort by date (soonest first) and filter out past events
   const sortedEvents = events
@@ -88,6 +97,9 @@ const getUpcomingEvents = (): Event[] => {
 export default function EventsCalendar() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [showSignUp, setShowSignUp] = useState(false)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [touchStart, setTouchStart] = useState(0)
+  const [touchEnd, setTouchEnd] = useState(0)
   
   const events = getUpcomingEvents()
 
@@ -100,8 +112,50 @@ export default function EventsCalendar() {
   }
 
   const handleSignUp = (event: Event) => {
+    // If event has an external link (e.g., Eventbrite), open it directly
+    if (event.externalLink) {
+      window.open(event.externalLink, '_blank', 'noopener,noreferrer')
+      return
+    }
+    // Otherwise, show the sign-up modal
     setSelectedEvent(event)
     setShowSignUp(true)
+  }
+
+  // Touch handlers for swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+
+    if (isLeftSwipe && currentIndex < events.length - 1) {
+      goToNext()
+    }
+    if (isRightSwipe && currentIndex > 0) {
+      goToPrevious()
+    }
+  }
+
+  const goToPrevious = () => {
+    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : events.length - 1))
+  }
+
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev < events.length - 1 ? prev + 1 : 0))
+  }
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index)
   }
 
   return (
@@ -111,8 +165,7 @@ export default function EventsCalendar() {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-abbah-charcoal mb-4">Upcoming Events</h2>
             <p className="text-lg text-abbah-charcoal/70 max-w-3xl mx-auto">
-              Join the Abbah Community in enrichment events hosted by our donors and volunteers. Here are the events
-              happening in the next couple of weeks.
+              Join the Abbah Community in enrichment events hosted by our donors and volunteers. Here are our upcoming events.
             </p>
           </div>
 
@@ -124,115 +177,172 @@ export default function EventsCalendar() {
             </div>
           )}
 
-          {/* Events Carousel */}
           {events.length > 0 && (
             <ScrollAnimation>
-              <div className="relative">
-                <div className="flex justify-center">
-                  <div className="flex gap-6 md:gap-8 max-w-full w-full md:w-auto">
-                    {events.slice(0, 2).map((event) => (
+              <div className="max-w-5xl mx-auto">
+                {/* Carousel Container */}
+                <div
+                  className="relative overflow-hidden rounded-lg"
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                >
+                  {/* Events Cards */}
+                  <div className="relative">
+                    {events.map((event, index) => (
                       <div
                         key={event.id}
-                        className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-abbah-light group flex-shrink-0 w-full md:w-[calc(50%-12px)]"
-                        style={{ maxWidth: '500px' }}
+                        className={`transition-opacity duration-500 ${
+                          index === currentIndex ? 'opacity-100 block' : 'opacity-0 hidden'
+                        }`}
                       >
-                        {/* Event Image */}
-                        <div className="relative h-48 overflow-hidden">
-                          <Image
-                            src={event.image}
-                            alt={event.title}
-                            fill
-                            className="object-cover group-hover:scale-110 transition-transform duration-300"
-                            sizes="350px"
-                          />
-                          <div className="absolute top-4 left-4">
-                            <span className="bg-abbah-gold text-abbah-charcoal px-3 py-1 rounded-full text-xs font-semibold uppercase">
-                              {event.category}
-                            </span>
-                          </div>
-                          <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg">
-                            <div className="text-abbah-charcoal font-bold text-lg">
-                              {event.date.getDate()}
+                        <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-abbah-light group">
+                          <div className="grid md:grid-cols-2 gap-0">
+                            {/* Event Image */}
+                            <div className="relative h-64 md:h-96 overflow-hidden">
+                              <Image
+                                src={event.image}
+                                alt={event.title}
+                                fill
+                                className="object-cover group-hover:scale-110 transition-transform duration-300"
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                              />
+                              <div className="absolute top-4 left-4">
+                                <span className="bg-abbah-gold text-abbah-charcoal px-4 py-2 rounded-full text-sm font-semibold uppercase">
+                                  {event.category}
+                                </span>
+                              </div>
+                              <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg">
+                                <div className="text-abbah-charcoal font-bold text-2xl">
+                                  {event.date.getDate()}
+                                </div>
+                                <div className="text-abbah-slate text-sm uppercase">
+                                  {event.date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                                </div>
+                              </div>
                             </div>
-                            <div className="text-abbah-slate text-xs uppercase">
-                              {event.date.toLocaleDateString('en-US', { month: 'short' })}
-                            </div>
-                          </div>
-                        </div>
 
-                        {/* Event Details */}
-                        <div className="p-6">
-                          <h4 className="text-xl font-bold text-abbah-charcoal mb-2">{event.title}</h4>
-                          <p className="text-abbah-charcoal/70 text-sm mb-4 line-clamp-3">{event.description}</p>
+                            {/* Event Details */}
+                            <div className="p-6 md:p-8 flex flex-col justify-center">
+                              <h4 className="text-2xl md:text-3xl font-bold text-abbah-charcoal mb-4">{event.title}</h4>
+                              <p className="text-abbah-charcoal/70 text-base mb-6 leading-relaxed">
+                                {event.description}
+                              </p>
 
-                          {/* Event Info */}
-                          <div className="space-y-2 mb-4 text-sm text-abbah-charcoal/70">
-                            <div className="flex items-center gap-2">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                />
-                              </svg>
-                              <span>{formatDate(event.date)}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                              <span>{event.time}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                />
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                />
-                              </svg>
-                              <span className="line-clamp-1">{event.location}</span>
+                              {/* Event Info */}
+                              <div className="space-y-3 mb-6 text-sm text-abbah-charcoal/70">
+                                <div className="flex items-center gap-3">
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                    />
+                                  </svg>
+                                  <span className="font-medium">{formatDate(event.date)}</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                  <span className="font-medium">{event.time}</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                    />
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                    />
+                                  </svg>
+                                  <span className="font-medium">{event.location}</span>
+                                </div>
+                              </div>
+
+                              {/* Eventbrite Link */}
+                              {event.externalLink && (
+                                <div className="mb-4">
+                                  <a
+                                    href={event.externalLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-abbah-gold hover:text-abbah-gold-alt text-base font-medium underline inline-flex items-center gap-2"
+                                  >
+                                    <span>Register on Eventbrite</span>
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                  </a>
+                                </div>
+                              )}
+
+                              <button
+                                onClick={() => handleSignUp(event)}
+                                className="w-full bg-abbah-dark hover:bg-abbah-dark-alt text-white px-8 py-3 rounded-md font-semibold uppercase text-sm transition-colors"
+                              >
+                                {event.externalLink ? 'Get Tickets' : 'Sign Up'}
+                              </button>
                             </div>
                           </div>
-
-                          <button
-                            onClick={() => handleSignUp(event)}
-                            className="w-full bg-abbah-dark hover:bg-abbah-dark-alt text-white px-6 py-3 rounded-md font-semibold uppercase text-sm transition-colors"
-                          >
-                            Sign Up
-                          </button>
                         </div>
                       </div>
                     ))}
-                    
-                    {/* Placeholder for second event if only one exists */}
-                    {events.length === 1 && (
-                      <div className="bg-abbah-light rounded-lg overflow-hidden shadow-md border-2 border-dashed border-abbah-slate flex-shrink-0 w-full md:w-[calc(50%-12px)] flex items-center justify-center min-h-[500px]"
-                        style={{ maxWidth: '500px' }}
-                      >
-                        <div className="text-center p-8">
-                          <svg className="w-16 h-16 mx-auto mb-4 text-abbah-slate" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          <h3 className="text-xl font-bold text-abbah-charcoal mb-2">More Events Brewing</h3>
-                          <p className="text-abbah-charcoal/70">We're planning more exciting events for our community. Check back soon!</p>
-                        </div>
-                      </div>
-                    )}
                   </div>
+
+                  {/* Navigation Arrows */}
+                  {events.length > 1 && (
+                    <>
+                      <button
+                        onClick={goToPrevious}
+                        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white p-2 sm:p-3 rounded-full transition-all hover:scale-110 shadow-xl border-2 border-white/20"
+                        aria-label="Previous event"
+                      >
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={goToNext}
+                        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white p-2 sm:p-3 rounded-full transition-all hover:scale-110 shadow-xl border-2 border-white/20"
+                        aria-label="Next event"
+                      >
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+
+                  {/* Dots Indicator */}
+                  {events.length > 1 && (
+                    <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+                      {events.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => goToSlide(index)}
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            index === currentIndex
+                              ? 'w-8 bg-abbah-gold shadow-lg'
+                              : 'w-2 bg-white/50 hover:bg-white/70 hover:w-3'
+                          }`}
+                          aria-label={`Go to event ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </ScrollAnimation>

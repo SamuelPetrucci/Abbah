@@ -9,7 +9,7 @@ export default function ResourcesPage() {
       title: 'Fathering Guide & Support Materials',
       description:
         'Comprehensive resources for fathers including guides, articles, and support materials to help navigate the journey of fatherhood. Access our library of downloadable resources covering topics from communication to discipline, bonding activities, and more.',
-      image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800&h=600&fit=crop&q=80',
+      image: '/family-laptop.png',
       category: 'Guides',
       items: ['Fathering Basics Guide', 'Communication Strategies', 'Bonding Activities', 'Discipline Approaches'],
     },
@@ -18,7 +18,7 @@ export default function ResourcesPage() {
       title: 'Community Support Programs',
       description:
         'Learn about our community support programs, group sessions, and networking opportunities. We offer regular support groups, peer mentorship programs, and community events designed to connect fathers with resources and each other.',
-      image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=600&fit=crop&q=80',
+      image: '/abbah-tribe-family.png',
       category: 'Programs',
       items: ['Monthly Support Groups', 'Peer Mentorship', 'Community Events', 'Networking Opportunities'],
     },
@@ -27,7 +27,7 @@ export default function ResourcesPage() {
       title: 'Educational Workshops & Events',
       description:
         'Browse our upcoming workshops, educational events, and community gatherings. Our workshops cover topics like parenting skills, work-life balance, relationship building, and more. Check our events calendar for upcoming sessions.',
-      image: 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=800&h=600&fit=crop&q=80',
+      image: '/hero-painting.png',
       category: 'Education',
       items: ['Parenting Workshops', 'Skill-Building Sessions', 'Guest Speaker Events', 'Family Activities'],
     },
@@ -36,7 +36,7 @@ export default function ResourcesPage() {
       title: 'Referral Services',
       description:
         'We work with local partners to connect families with additional services including counseling, legal assistance, job training, and housing resources. Contact us to learn more about referral options available in your area.',
-      image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&h=600&fit=crop&q=80',
+      image: '/hero-painting.png',
       category: 'Services',
       items: ['Counseling Referrals', 'Legal Assistance', 'Job Training Programs', 'Housing Resources'],
     },

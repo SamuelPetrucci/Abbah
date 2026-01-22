@@ -23,7 +23,7 @@ export default function Header() {
         <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
           <div className="relative h-16 md:h-20 lg:h-24 w-auto flex-shrink-0">
             <Image
-              src="/image.png"
+              src="/headerlogo.png"
               alt="Abbah - Fathering for Good"
               width={200}
               height={96}

@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import ScrollAnimation from '@/components/ScrollAnimation'
 
 export default function Partners() {
@@ -8,11 +9,13 @@ export default function Partners() {
       name: 'SCRIP',
       fullName: 'Second Chance Reentry Initiative Program',
       description: 'Supporting reentry and community reintegration programs',
+      logo: '/scrip-logo.png',
     },
     {
       name: 'NEW LIFE II',
       fullName: 'New Life II',
       description: 'Empowering individuals and families through comprehensive support',
+      logo: '/newlife-logo.png',
     },
   ]
 
@@ -32,11 +35,25 @@ export default function Partners() {
           {partners.map((partner, index) => (
             <ScrollAnimation key={partner.name}>
               <div className="text-center bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow min-w-[280px] max-w-[350px]">
-                <div className="text-abbah-charcoal">
-                  <div className="text-3xl font-bold mb-2 text-abbah-dark">{partner.name}</div>
-                  <div className="text-sm text-abbah-charcoal/70 mb-4 font-medium">{partner.fullName}</div>
-                  <div className="text-xs text-abbah-charcoal/60">{partner.description}</div>
-                </div>
+                {partner.logo ? (
+                  <div className="mb-6 flex justify-center">
+                    <div className="relative w-48 h-32">
+                      <Image
+                        src={partner.logo}
+                        alt={partner.fullName}
+                        fill
+                        className="object-contain"
+                        sizes="192px"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-abbah-charcoal mb-4">
+                    <div className="text-3xl font-bold mb-2 text-abbah-dark">{partner.name}</div>
+                    <div className="text-sm text-abbah-charcoal/70 font-medium">{partner.fullName}</div>
+                  </div>
+                )}
+                <div className="text-xs text-abbah-charcoal/60">{partner.description}</div>
               </div>
             </ScrollAnimation>
           ))}
